@@ -218,7 +218,7 @@ function App() {
 
       // Đổi các dòng alert báo lỗi và thành công thành triggerPopup
       if (response.ok) {
-        triggerPopup("Gửi lời mời thành công về Discord rồi nhé! 🥳💖");
+        triggerPopup("You just made my day!💖");
       } else {
         triggerPopup("Úi, có lỗi khi gửi đi rồi, kiểm tra lại Webhook URL nhé! 🥺");
       }
