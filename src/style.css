@@ -1,0 +1,77 @@
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #222;
+}
+
+.map-container {
+    position: relative;
+    width: 800px; /* Điều chỉnh kích thước bản đồ */
+    height: 600px;
+}
+
+.map-background {
+    width: 100%;
+    height: 100%;
+    display: block;
+    image-rendering: pixelated; /* Giữ phong cách pixel art */
+}
+
+.flight-path-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Không che khuất các phần tử khác */
+}
+
+.flight-path {
+    fill: none;
+    stroke: red; /* Màu đường bay */
+    stroke-width: 2; /* Độ rộng đường bay */
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 10 10; /* Tạo đường nét đứt (độ dài nét và khoảng cách) */
+    stroke-dashoffset: 0; /* Offset ban đầu để vẽ */
+    animation: drawLine 2s forwards ease-out; /* Hoạt ảnh vẽ đường bay */
+}
+
+/* Hoạt ảnh vẽ đường bay */
+@keyframes drawLine {
+    from {
+        stroke-dashoffset: 1000; /* Bắt đầu với offset lớn (giá trị chính xác được JavaScript tính toán) */
+    }
+    to {
+        stroke-dashoffset: 0; /* Kết thúc bằng vẽ xong */
+    }
+}
+
+.airplane {
+    position: absolute;
+    width: 40px; /* Điều chỉnh kích thước máy bay */
+    height: auto;
+    image-rendering: pixelated; /* Giữ phong cách pixel art */
+    pointer-events: none;
+    /* Thiết lập đường dẫn di chuyển */
+    offset-path: path("M 85,25 Q 60,35 25,75"); /* Phải trùng khớp với d của path SVG */
+    offset-rotate: auto 180deg; /* Tự động xoay máy bay theo hướng đường bay */
+    offset-distance: 0%; /* Di chuyển từ 0% đến 100% */
+    animation: fly 2s forwards ease-out; /* Hoạt ảnh di chuyển máy bay */
+    display: none; /* Bắt đầu ẩn máy bay */
+}
+
+/* Hoạt ảnh di chuyển máy bay */
+@keyframes fly {
+    from {
+        offset-distance: 0%;
+        display: block; /* Hiển thị máy bay */
+    }
+    to {
+        offset-distance: 100%;
+        display: block; /* Giữ hiển thị khi kết thúc */
+    }
+}

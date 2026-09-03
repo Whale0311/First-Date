@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+.pixelated {
+  image-rendering: pixelated;
+}
+
+.airplane-moving-wrapper {
+  opacity: 0; 
+  animation: simpleFly 3.5s cubic-bezier(0.3, 0.1, 0.4, 1) forwards;
+}
+
+@keyframes simpleFly {
+  0% {
+    /* Điểm xuất phát: Gần Nhật Bản */
+    top: 18%;
+    left: 55%;
+    /* BỎ rotate, chỉ giữ lại scale(0.5) để thu nhỏ máy bay lúc ở xa */
+    transform: scale(1.0); 
+    opacity: 0;
+  }
+  15% {
+    opacity: 1; 
+  }
+  100% {
+    /* Điểm đến: Việt Nam */
+    top: 48%;
+    left: 20%;
+    /* BỎ rotate, phóng to máy bay lúc đến gần */
+    transform: scale(1.2); 
+    opacity: 1;
+  }
+}
+/* Hiệu ứng mờ dần khi chuyển trang */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Tùy chỉnh thanh cuộn cho khu vực chọn đồ ăn */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #ffb6c1; 
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #ff4d88; 
+  border-radius: 4px;
+}
+/* --- CSS CHO MÂY TRANG TRÍ NỀN --- */
+.bg-cloud {
+  position: absolute;
+  pointer-events: none; /* Rất quan trọng: Để mây không vô tình đè lên các nút bấm khiến không click được */
+  z-index: 0; /* Nằm dưới z-10 của nội dung chính */
+  opacity: 0.85; /* Hơi mờ một xíu để tôn nội dung lên */
+}
+
+/* Hiệu ứng bồng bềnh */
+.animate-float-slow {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-slower {
+  animation: float 8s ease-in-out infinite;
+  animation-delay: 2s; /* Lệch nhịp so với đám mây kia cho tự nhiên */
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
