@@ -308,9 +308,13 @@ function App() {
       {/* --- TRANG 2: HIỆU ỨNG BAY --- */}
       {step === 2 && (
         <div className="absolute inset-0 bg-[#005c94] flex justify-center items-center z-50 p-2 md:p-8">
+          {/* Dòng chữ Welcome nhấp nháy nhẹ */}
+          <h2 className="text-white text-4xl md:text-5xl font-bold mb-6 tracking-widest drop-shadow-[3px_3px_0_#ff4d88] text-center uppercase animate-pulse">
+            Welcome back to Vietnam! 🥰
+          </h2>
           {/* Bản đồ sẽ tràn viền (95% chiều rộng) trên mobile, và max-6xl trên PC */}
           <div className="relative w-[95vw] md:max-w-6xl bg-[#005c94] border-4 md:border-[6px] border-white shadow-2xl rounded-xl md:rounded-2xl overflow-hidden">
-            
+
             <img src="/map.png" alt="Map" className="w-full h-auto block pixelated" />
 
             <div className="airplane-moving-wrapper absolute z-20 w-16 h-16 sm:w-24 sm:h-24 md:w-40 md:h-40">
