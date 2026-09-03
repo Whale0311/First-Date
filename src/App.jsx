@@ -43,17 +43,25 @@ function App() {
     activity: '',
     extras: []
   });
+  const [popup, setPopup] = useState({ show: false, message: '' });
+
+  const triggerPopup = (msg) => {
+    setPopup({ show: true, message: msg });
+  };
+
+  const closePopup = () => {
+    setPopup({ show: false, message: '' });
+  };
   const handleDateChange = (e) => {
     setDateData({ ...dateData, date: e.target.value });
   };
 
-  // Hàm xử lý khi bấm Continue ở Trang 3
   const handleDateSubmit = () => {
     if (!dateData.date) {
-      alert("Please pick a date first! 🥺");
+      triggerPopup("Please pick a date first! 🥺");
       return;
     }
-    setStep(4); // Chuyển sang Trang 4 (Chọn hoạt động)
+    setStep(4); 
   };
 
   // Hàm xử lý chọn hoạt động ở Trang 4
@@ -159,12 +167,11 @@ function App() {
   // Hàm bấm Continue ở màn hình Food Tour
   const handleFoodSubmit = () => {
     if (selectedFoods.length === 0) {
-      alert("Chọn ít nhất 1 món hoặc chọn '???' đi nè! 🤤");
+      triggerPopup("Chọn ít nhất 1 món hoặc chọn '???' đi nè! 🤤");
       return;
     }
-    // Lưu các món đã chọn vào dateData.extras
     setDateData({ ...dateData, extras: selectedFoods });
-    setStep(7); // Chuyển thẳng đến trang Confirm (Trang 7)
+    setStep(7); 
   };
   // --- HÀM GỬI DỮ LIỆU ĐẾN DISCORD WEBHOOK ---
   const handleFinalSend = async () => {
@@ -209,14 +216,14 @@ function App() {
         body: JSON.stringify(message),
       });
 
+      // Đổi các dòng alert báo lỗi và thành công thành triggerPopup
       if (response.ok) {
-        alert("Gửi lời mời thành công về Discord rồi nhé! 🥳💖");
+        triggerPopup("Gửi lời mời thành công về Discord rồi nhé! 🥳💖");
       } else {
-        alert("Úi, có lỗi khi gửi đi rồi, kiểm tra lại Webhook URL nhé! 🥺");
+        triggerPopup("Úi, có lỗi khi gửi đi rồi, kiểm tra lại Webhook URL nhé! 🥺");
       }
     } catch (error) {
-      console.error("Error sending webhook:", error);
-      alert("Không thể kết nối tới Discord!");
+      triggerPopup("Không thể kết nối tới Discord!");
     }
   };
   return (
@@ -647,6 +654,23 @@ function App() {
           >
             Send Invitation <span>💌</span>
           </button>
+        </div>
+      )}
+      {/* --- CUSTOM POPUP THÔNG BÁO --- */}
+      {popup.show && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white border-4 border-[#ff4d88] rounded-xl p-6 md:p-8 shadow-[6px_6px_0_0_#ff4d88] text-center max-w-[80%] md:max-w-sm animate-fade-in flex flex-col items-center">
+            <span className="text-5xl mb-4">🔔</span>
+            <p className="text-[#ff4d88] text-2xl md:text-3xl font-bold mb-6 leading-tight">
+              {popup.message}
+            </p>
+            <button 
+              onClick={closePopup}
+              className="bg-[#ffe4e1] text-[#ff4d88] px-8 py-2 border-4 border-[#ff4d88] rounded font-bold text-2xl hover:bg-pink-50 hover:scale-105 active:scale-95 transition-all shadow-[3px_3px_0_0_#ff4d88] cursor-pointer uppercase"
+            >
+              OK !
+            </button>
+          </div>
         </div>
       )}
     </div>
