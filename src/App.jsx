@@ -15,8 +15,11 @@ const foodOptions = [
   { id: 'f11', name: 'Bún r iêu', image: '/bunrieu.jpg', emoji: '' },
   { id: 'f12', name: 'Đồ Hàn', image: '/dohan.jpg', emoji: '' },
   { id: 'f13', name: 'Bánh Ram Ít', image: '/ramit.webp', emoji: '' },
+  { id: 'f14', name: 'Bánh Rán Mật', image: '/banhgianmat.jpg', emoji: '' },
+  { id: 'f15', name: 'Cốm', image: '/com.jpg', emoji: '' },
+
   // Ô đặc biệt: Random
-  { id: 'f14', name: '???', image: '/random.jpg', emoji: '🤫' },
+  { id: 'f16', name: '???', image: '/random.jpg', emoji: '🤫' },
 ];
 // --- DANH SÁCH WORKSHOP
 const workshopOptions = [
@@ -38,6 +41,7 @@ function App() {
   const [step, setStep] = useState(1); 
   const [selectedWorkshops, setSelectedWorkshops] = useState([]);
   const [selectedMovies, setSelectedMovies] = useState([]);
+  const [customRequest, setCustomRequest] = useState(''); // THÊM DÒNG NÀY
   const [dateData, setDateData] = useState({
     date: '',
     activity: '',
@@ -63,38 +67,78 @@ function App() {
     }
     setStep(4); 
   };
+  // Các hàm Submit sửa lại để quay về trang 4
+  const handleFoodSubmit = () => {
+    if (selectedFoods.length === 0) {
+      triggerPopup("Chọn ít nhất 1 món hoặc chọn '???' đi nè! 🤤");
+      return;
+    }
+    setStep(4); // QUAY VỀ TRANG 4
+  };
 
-  // Hàm xử lý chọn hoạt động ở Trang 4
+  const handleWorkshopSubmit = () => {
+    if (selectedWorkshops.length === 0) {
+      triggerPopup("Chọn ít nhất 1 cái hoặc '???' đi mà! 🥺");
+      return;
+    }
+    setStep(4); // QUAY VỀ TRANG 4
+  };
+
+  const handleMovieSubmit = () => {
+    if (selectedMovies.length === 0) {
+      triggerPopup("Chọn ít nhất 1 phim hoặc chọn '???' đi nè! 🍿");
+      return;
+    }
+    setStep(4); // QUAY VỀ TRANG 4
+  };
+
+  // Hàm mới cho Yêu cầu riêng
+  const handleCustomSubmit = () => {
+    setStep(4); // QUAY VỀ TRANG 4
+  };
+
+  // Hàm mới khi bấm "XONG RỒI" ở trang 4
+  const handleGoToConfirm = () => {
+    if (selectedFoods.length === 0 && selectedWorkshops.length === 0 && selectedMovies.length === 0 && !customRequest && dateData.activity !== 'Board Game' && dateData.activity !== 'Surprise Me') {
+      triggerPopup("Cậu chọn ít nhất 1 hoạt động nha! 🥺");
+      return;
+    }
+    setStep(7);
+  };
   const handleActivitySelect = (act) => {
-    setDateData({ ...dateData, activity: act });
-    
-    if (act === 'Food Tour') {
-      setStep(5);
-    } else if (act === 'Art Workshop') {
-      setStep(6);
-    } else if (act === 'Movie Night') {
-      setStep(8);
-    } else {
-      setStep(7);
+    if (act === 'Food Tour') setStep(5);
+    else if (act === 'Art Workshop') setStep(6);
+    else if (act === 'Movie Night') setStep(8);
+    else if (act === 'Custom Request') setStep(9);
+    else if (act === 'Board Game') {
+      // Bật/tắt trạng thái chọn Board Game
+      setDateData(prev => ({
+        ...prev,
+        activity: prev.activity === 'Board Game' ? '' : 'Board Game'
+      }));
+    }
+    else if (act === 'Surprise Me') {
+      // Đặt activity thành Surprise Me và xóa sạch các lựa chọn khác
+      setDateData(prev => ({ ...prev, activity: 'Surprise Me' }));
+      setSelectedFoods([]);
+      setSelectedMovies([]);
+      setSelectedWorkshops([]);
+      setCustomRequest('');
+      setStep(7); // Nhảy thẳng ra trang cuối
     }
   };
 
   const handleBack = () => {
-    // Nếu đang ở trang chọn phim (step 8), món ăn (step 5), hoặc workshop (step 6)
-    // thì quay về trang 4 (chọn hoạt động)
-    if (step === 5 || step === 6 || step === 8) {
+    if (step === 5 || step === 6 || step === 8 || step === 9) {
       setStep(4);
     } 
-    // Nếu đang ở trang Confirm (step 7)
     else if (step === 7) {
       setStep(4);
-      // Xóa dữ liệu cũ khi quay lại từ trang cuối
-      setDateData({ ...dateData, extras: [] });
-      setSelectedFoods([]);
-      setSelectedWorkshops([]);
-      setSelectedMovies([]);
+      // Nếu vừa từ Surprise Me quay lại thì reset activity
+      if (dateData.activity === 'Surprise Me') {
+        setDateData(prev => ({ ...prev, activity: '' }));
+      }
     } 
-    // Các trang còn lại (như từ trang 4 về trang 3) thì lùi 1 bước bình thường
     else if (step > 3) {
       setStep(step - 1);
     }
@@ -126,24 +170,6 @@ function App() {
     });
   };
 
-  const handleMovieSubmit = () => {
-    if (selectedMovies.length === 0) {
-      alert("Chọn ít nhất 1 phim hoặc chọn '???' đi nè! 🍿");
-      return;
-    }
-    setDateData({ ...dateData, extras: selectedMovies });
-    setStep(7); 
-  };
-  // --- [THÊM MỚI] Hàm bấm Continue ở màn hình Art Workshop ---
-  const handleWorkshopSubmit = () => {
-    if (selectedWorkshops.length === 0) {
-      alert("Chọn ít nhất 1 cái hoặc '???' đi mà! 🥺");
-      return;
-    }
-    // Lưu các workshop đã chọn vào dateData.extras
-    setDateData({ ...dateData, extras: selectedWorkshops });
-    setStep(7); // Chuyển đến trang Confirm (Trang 7)
-  };
   const handleYesClick = () => {
     setStep(2); 
     setTimeout(() => {
@@ -164,16 +190,7 @@ function App() {
     });
   };
 
-  // Hàm bấm Continue ở màn hình Food Tour
-  const handleFoodSubmit = () => {
-    if (selectedFoods.length === 0) {
-      triggerPopup("Chọn ít nhất 1 món hoặc chọn '???' đi nè! 🤤");
-      return;
-    }
-    setDateData({ ...dateData, extras: selectedFoods });
-    setStep(7); 
-  };
-  // --- HÀM GỬI DỮ LIỆU ĐẾN DISCORD WEBHOOK ---
+  
   const handleFinalSend = async () => {
     // Dán URL Webhook Discord của bạn vào đây
     const webhookUrl = "https://discord.com/api/webhooks/1543983290254626816/jtar3sMHG2Y7A72ewO81Af9oAf6ngATntAGCBbNJdowK-hbuZSr7CxDuwFZS5OOE1q8F"; 
@@ -184,23 +201,14 @@ function App() {
       embeds: [
         {
           title: "💌 Date Invitation Details",
-          color: 0xff4d88, // Màu hồng chủ đạo
+          color: 0xff4d88,
           fields: [
-            {
-              name: "📅 Ngày hẹn (Date)",
-              value: dateData.date || "Chưa chọn",
-              inline: false
-            },
-            {
-              name: "🎯 Hoạt động (Activity)",
-              value: dateData.activity.toUpperCase() || "Chưa chọn",
-              inline: false
-            },
-            {
-              name: "🛍️ Chi tiết lựa chọn (Details)",
-              value: dateData.extras.length > 0 ? dateData.extras.join(", ") : "Không có",
-              inline: false
-            }
+            { name: "📅 Ngày hẹn", value: dateData.date || "Chưa chọn", inline: false },
+            { name: "🎯 Hoạt động khác", value: dateData.activity || "Không có", inline: false },
+            { name: "🍜 Food Tour", value: selectedFoods.length > 0 ? selectedFoods.join(", ") : "Không chọn", inline: false },
+            { name: "🍿 Movie Night", value: selectedMovies.length > 0 ? selectedMovies.join(", ") : "Không chọn", inline: false },
+            { name: "🎨 Workshop", value: selectedWorkshops.length > 0 ? selectedWorkshops.join(", ") : "Không chọn", inline: false },
+            { name: "✍️ Yêu cầu riêng", value: customRequest || "Không có", inline: false }
           ],
           timestamp: new Date().toISOString()
         }
@@ -254,9 +262,12 @@ function App() {
       {step >= 4 && (
         <button 
           onClick={handleBack}
-          className="absolute top-4 left-4 md:top-8 md:left-8 bg-white text-[#ff4d88] text-xl font-bold px-4 py-2 border-4 border-[#ff4d88] rounded shadow-[3px_3px_0_0_#ff4d88] transition-transform duration-200 hover:bg-pink-50 hover:scale-105 active:scale-95 z-50 flex items-center gap-2 cursor-pointer"
+          // Đã thu nhỏ px-3 cho mobile, md:px-4 cho máy tính, giảm gap xuống
+          className="absolute top-4 left-4 md:top-8 md:left-8 bg-white text-[#ff4d88] text-2xl font-bold px-3 py-2 md:px-4 border-4 border-[#ff4d88] rounded shadow-[3px_3px_0_0_#ff4d88] transition-transform duration-200 hover:bg-pink-50 hover:scale-105 active:scale-95 z-50 flex items-center justify-center gap-1 md:gap-2 cursor-pointer"
         >
-          <span>←</span> Back
+          <span>←</span>
+          {/* Class hidden md:inline sẽ giấu chữ Back trên điện thoại và hiện trên máy tính */}
+          <span className="hidden md:inline text-xl">Back</span>
         </button>
       )}
       {/* ------------------------- */}
@@ -372,64 +383,53 @@ function App() {
         </div>
       )}
 
-      {/* --- TRANG 4: WHAT WOULD YOU LIKE TO DO? --- */}
+      {/* --- TRANG 4: WHAT WOULD YOU LIKE TO DO? (TRUNG TÂM) --- */}
       {step === 4 && (
-        <div className="flex flex-col items-center justify-center w-full max-w-2xl px-4 z-10 animate-fade-in">
-          
-          <h1 className="text-white text-4xl md:text-6xl font-bold mb-2 tracking-widest drop-shadow-[3px_3px_0_#ff4d88] text-center uppercase leading-tight">
+        <div className="flex flex-col items-center justify-center w-full max-w-2xl px-4 z-10 animate-fade-in pb-10">
+          <h1 className="text-white text-4xl md:text-6xl font-bold mb-2 tracking-widest drop-shadow-[3px_3px_0_#ff4d88] text-center uppercase leading-tight mt-10">
             What would you<br/>like to do?
           </h1>
           <p className="text-white text-xl md:text-2xl mb-8 tracking-wide drop-shadow-[1px_1px_0_#ff4d88] text-center">
-            Pick one of the options below
+            Pick ANYTHING you want!
           </p>
 
-          {/* Lưới 4 lựa chọn */}
-          <div className="grid grid-cols-2 gap-4 md:gap-6 w-full max-w-lg">
-            
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 w-full max-w-2xl">
             {/* 1. Food Tour */}
-            <button 
-              onClick={() => handleActivitySelect('Food Tour')}
-              className="flex flex-col items-center justify-center p-4 bg-white border-4 border-[#ff4d88] rounded shadow-[4px_4px_0_0_#ff4d88] transition-transform duration-200 hover:scale-105 hover:bg-pink-50 cursor-pointer h-32 md:h-40"
-            >
-              <span className="text-4xl md:text-5xl mb-2">🛵</span>
-              <span className="text-[#ff4d88] text-2xl md:text-3xl font-bold uppercase text-center leading-none">Food Tour</span>
+            <button onClick={() => handleActivitySelect('Food Tour')} className="flex flex-col items-center justify-center p-4 bg-white border-4 border-[#ff4d88] rounded shadow-[4px_4px_0_0_#ff4d88] transition-transform hover:scale-105 h-32">
+              <span className="text-4xl mb-2">🛵</span><span className="text-[#ff4d88] text-xl font-bold uppercase text-center leading-none">Food Tour</span>
+              {selectedFoods.length > 0 && <span className="text-[#22c55e] text-sm mt-1">({selectedFoods.length} selected)</span>}
             </button>
-
-            {/* 2. Art Workshop (Thay Movie) */}
-            <button 
-              onClick={() => handleActivitySelect('Art Workshop')}
-              className="flex flex-col items-center justify-center p-4 bg-white border-4 border-[#ff4d88] rounded shadow-[4px_4px_0_0_#ff4d88] transition-transform duration-200 hover:scale-105 hover:bg-pink-50 cursor-pointer h-32 md:h-40"
-            >
-              <span className="text-4xl md:text-5xl mb-2">🎨</span>
-              <span className="text-[#ff4d88] text-2xl md:text-3xl font-bold uppercase text-center leading-none">Workshop</span>
+            {/* 2. Movie Night */}
+            <button onClick={() => handleActivitySelect('Movie Night')} className="flex flex-col items-center justify-center p-4 bg-white border-4 border-[#ff4d88] rounded shadow-[4px_4px_0_0_#ff4d88] transition-transform hover:scale-105 h-32">
+              <span className="text-4xl mb-2">🍿</span><span className="text-[#ff4d88] text-xl font-bold uppercase text-center leading-none">Movie Night</span>
+              {selectedMovies.length > 0 && <span className="text-[#22c55e] text-sm mt-1">({selectedMovies.length} selected)</span>}
             </button>
-
-            {/* 3. Board Game (Thay Coffee trơn) */}
-            <button 
-              onClick={() => handleActivitySelect('Board Game')}
-              className="flex flex-col items-center justify-center p-4 bg-white border-4 border-[#ff4d88] rounded shadow-[4px_4px_0_0_#ff4d88] transition-transform duration-200 hover:scale-105 hover:bg-pink-50 cursor-pointer h-32 md:h-40"
-            >
-              <span className="text-4xl md:text-5xl mb-2">🎲</span>
-              <span className="text-[#ff4d88] text-2xl md:text-3xl font-bold uppercase text-center leading-none">Board Game</span>
+            {/* 3. Art Workshop */}
+            <button onClick={() => handleActivitySelect('Art Workshop')} className="flex flex-col items-center justify-center p-4 bg-white border-4 border-[#ff4d88] rounded shadow-[4px_4px_0_0_#ff4d88] transition-transform hover:scale-105 h-32">
+              <span className="text-4xl mb-2">🎨</span><span className="text-[#ff4d88] text-xl font-bold uppercase text-center leading-none">Workshop</span>
+              {selectedWorkshops.length > 0 && <span className="text-[#22c55e] text-sm mt-1">({selectedWorkshops.length} selected)</span>}
             </button>
-            {/* Thêm mục Movie Night */}
-            <button 
-              onClick={() => handleActivitySelect('Movie Night')}
-              className="flex flex-col items-center justify-center p-4 bg-white border-4 border-[#ff4d88] rounded shadow-[4px_4px_0_0_#ff4d88] transition-transform duration-200 hover:scale-105 hover:bg-pink-50 cursor-pointer h-32 md:h-40"
-            >
-              <span className="text-4xl md:text-5xl mb-2">🍿</span>
-              <span className="text-[#ff4d88] text-2xl md:text-3xl font-bold uppercase text-center leading-none">Movie Night</span>
+            {/* 4. Board Game */}
+            <button onClick={() => handleActivitySelect('Board Game')} className={`flex flex-col items-center justify-center p-4 bg-white border-4 border-[#ff4d88] rounded shadow-[4px_4px_0_0_#ff4d88] transition-transform hover:scale-105 h-32 ${dateData.activity === 'Board Game' ? 'bg-[#ffe4e1] border-[#22c55e]' : ''}`}>
+              <span className="text-4xl mb-2">🎲</span>
+              <span className="text-[#ff4d88] text-xl font-bold uppercase text-center leading-none">Board Game</span>
+              {dateData.activity === 'Board Game' && <span className="text-[#22c55e] text-sm mt-1 font-bold">(Đã chọn)</span>}
             </button>
-
-            {/* 4. Surprise Me */}
-            <button 
-              onClick={() => handleActivitySelect('Surprise Me')}
-              className="flex flex-col items-center justify-center p-4 bg-white border-4 border-[#ff4d88] rounded shadow-[4px_4px_0_0_#ff4d88] transition-transform duration-200 hover:scale-105 hover:bg-pink-50 cursor-pointer h-32 md:h-40"
-            >
-              <span className="text-4xl md:text-5xl mb-2">🎁</span>
-              <span className="text-[#ff4d88] text-2xl md:text-3xl font-bold uppercase text-center leading-none">Surprise Me</span>
+            {/* 5. Surprise Me */}
+            <button onClick={() => handleActivitySelect('Surprise Me')} className={`flex flex-col items-center justify-center p-4 bg-white border-4 border-[#ff4d88] rounded shadow-[4px_4px_0_0_#ff4d88] transition-transform hover:scale-105 h-32 ${dateData.activity === 'Surprise Me' ? 'bg-pink-100 ring-2 ring-[#22c55e]' : ''}`}>
+              <span className="text-4xl mb-2">🎁</span><span className="text-[#ff4d88] text-xl font-bold uppercase text-center leading-none">Surprise Me</span>
+            </button>
+            {/* 6. Custom Request (Yêu cầu riêng) */}
+            <button onClick={() => handleActivitySelect('Custom Request')} className="flex flex-col items-center justify-center p-4 bg-white border-4 border-[#ff4d88] rounded shadow-[4px_4px_0_0_#ff4d88] transition-transform hover:scale-105 h-32">
+              <span className="text-4xl mb-2">✍️</span><span className="text-[#ff4d88] text-xl font-bold uppercase text-center leading-none">Your Rules!</span>
+              {customRequest && <span className="text-[#22c55e] text-sm mt-1">(Added)</span>}
             </button>
           </div>
+
+          {/* Nút CHỐT PLAN chuyển sang trang Confirm */}
+          <button onClick={handleGoToConfirm} className="mt-10 w-[90%] md:w-3/4 h-16 bg-[#22c55e] text-white text-3xl font-bold border-4 border-[#166534] rounded shadow-[4px_4px_0_0_#166534] transition-transform hover:scale-105 active:scale-95 cursor-pointer uppercase flex justify-center items-center gap-2">
+            Xong Rồi ! <span>🎉</span>
+          </button>
         </div>
       )}
       {/* --- TRANG 5: CHỌN MÓN ĂN (FOOD TOUR) --- */}
@@ -589,73 +589,109 @@ function App() {
           </button>
         </div>
       )}
+      {/* --- TRANG 9: YÊU CẦU RIÊNG --- */}
+      {step === 9 && (
+        <div className="flex flex-col items-center w-full max-w-2xl px-4 z-10 animate-fade-in py-6 pt-16">
+          <h1 className="text-white text-4xl md:text-5xl font-bold mb-4 tracking-widest drop-shadow-[3px_3px_0_#ff4d88] text-center uppercase">
+            Your Rules!
+          </h1>
+          <p className="text-white text-xl md:text-2xl mb-6 tracking-wide drop-shadow-[1px_1px_0_#ff4d88] text-center">
+            Cậu có lưu ý gì cho tớ khum!
+          </p>
+          <textarea
+            value={customRequest}
+            onChange={(e) => setCustomRequest(e.target.value)}
+            placeholder="..."
+            className="w-full h-40 p-4 text-xl md:text-2xl text-[#ff4d88] border-4 border-[#ff4d88] rounded-xl shadow-[4px_4px_0_0_#ff4d88] outline-none resize-none font-['VT323']"
+          />
+          <button onClick={handleCustomSubmit} className="mt-6 w-[80%] md:w-1/2 h-14 bg-white text-[#ff4d88] text-2xl font-bold border-4 border-[#ff4d88] rounded shadow-[4px_4px_0_0_#ff4d88] transition-transform hover:scale-105 cursor-pointer uppercase">
+            Lưu Lại <span>→</span>
+          </button>
+        </div>
+      )}
       {/* --- TRANG 7: TỔNG KẾT & CONFIRM --- */}
       {step === 7 && (
-        <div className="flex flex-col items-center justify-center w-full max-w-2xl px-4 z-10 animate-fade-in gap-6 pb-10">
-          
+        <div className="flex flex-col items-center justify-center w-full max-w-2xl px-4 z-10 animate-fade-in gap-6 pb-10 pt-16">
           <div className="bg-[#e0f7fa] p-2 rounded-lg border-4 border-[#ff7eb3] shadow-[4px_4px_0_0_#ff4d88]">
             <img src="/cute-bear3.gif" alt="Cute Bears Celebrate" className="w-24 h-24 md:w-32 md:h-32 object-cover rounded" />
           </div>
 
-          <h1 className="text-white text-5xl md:text-6xl font-bold mb-2 tracking-widest drop-shadow-[3px_3px_0_#ff4d88] text-center uppercase leading-tight">
-            YAY! IT'S SET!
-          </h1>
-          
-          {/* Bảng tổng kết plan */}
-          <div className="w-full bg-white border-4 border-[#ff4d88] rounded-xl p-6 shadow-[6px_6px_0_0_#ff4d88] text-left space-y-4">
-            
-            <div className="flex items-center gap-3">
-              <span className="text-4xl">📅</span>
-              <div>
-                <p className="text-gray-400 text-sm uppercase font-bold leading-none">Date</p>
-                <p className="text-[#ff4d88] text-2xl md:text-3xl font-bold">{dateData.date}</p>
+          {/* KIỂM TRA NẾU LÀ SURPRISE ME THÌ HIỆN BẢNG KHÁC */}
+          {dateData.activity === 'Surprise Me' ? (
+            <>
+              <h1 className="text-white text-5xl md:text-6xl font-bold mb-2 tracking-widest drop-shadow-[3px_3px_0_#ff4d88] text-center uppercase leading-tight">
+                OH WOW! 🎁
+              </h1>
+              <div className="w-full bg-white border-4 border-[#ff4d88] rounded-xl p-8 shadow-[6px_6px_0_0_#ff4d88] text-center space-y-4 relative z-20">
+                <p className="text-[#ff4d88] text-3xl md:text-4xl font-bold">
+                  Cậu tin tưởng tớ đến thế sao? 🥺💖
+                </p>
+                <p className="text-gray-500 text-xl font-bold mt-2">
+                  (Mọi lịch trình cứ để tớ lo nhé!)
+                </p>
               </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span className="text-4xl">
-                {dateData.activity === 'Food Tour' && '🛵'}
-                {dateData.activity === 'Art Workshop' && '🎨'}
-                {dateData.activity === 'Movie Night' && '🍿'}
-                {dateData.activity === 'Board Game' && '🎲'}
-                {dateData.activity === 'Surprise Me' && '🎁'}
-              </span>
-              <div>
-                <p className="text-gray-400 text-sm uppercase font-bold leading-none">Activity</p>
-                <p className="text-[#ff4d88] text-2xl md:text-3xl font-bold uppercase">{dateData.activity}</p>
-              </div>
-            </div>
-
-            {(dateData.activity === 'Food Tour' || dateData.activity === 'Art Workshop' || dateData.activity === 'Movie Night') && (
-              <div className="flex items-start gap-3 border-t-2 border-dashed border-gray-100 pt-4">
-                <span className="text-4xl">
-                    {dateData.activity === 'Food Tour' ? '🍜' : (dateData.activity === 'Movie Night' ? '🎬' : '🖌️')}
-                </span>
-                <div className="flex-grow">
-                  <p className="text-gray-400 text-sm uppercase font-bold leading-none">Details</p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {dateData.extras.map((item, index) => (
-                      <span 
-                        key={index} 
-                        className="bg-pink-100 text-[#ff4d88] font-bold px-3 py-1 rounded-full border border-pink-200 text-sm md:text-base shadow-sm"
-                      >
-                        {item}
-                      </span>
-                    ))}
+            </>
+          ) : (
+            // NẾU KHÔNG PHẢI SURPRISE ME THÌ HIỆN BẢNG TỔNG KẾT BÌNH THƯỜNG
+            <>
+              <h1 className="text-white text-5xl md:text-6xl font-bold mb-2 tracking-widest drop-shadow-[3px_3px_0_#ff4d88] text-center uppercase leading-tight">
+                YAY! IT'S SET!
+              </h1>
+              <div className="w-full bg-white border-4 border-[#ff4d88] rounded-xl p-6 shadow-[6px_6px_0_0_#ff4d88] text-left space-y-4 max-h-[50vh] overflow-y-auto custom-scrollbar relative z-20">
+                
+                <div className="flex items-center gap-3 border-b-2 border-dashed border-gray-100 pb-2">
+                  <span className="text-4xl">📅</span>
+                  <div>
+                    <p className="text-gray-400 text-sm uppercase font-bold leading-none">Date</p>
+                    <p className="text-[#ff4d88] text-2xl font-bold">{dateData.date}</p>
                   </div>
                 </div>
+
+                {selectedFoods.length > 0 && (
+                  <div className="flex flex-col gap-1 border-b-2 border-dashed border-gray-100 pb-2">
+                    <p className="text-gray-400 text-sm uppercase font-bold">🍜 Food Tour</p>
+                    <p className="text-[#ff4d88] text-xl font-bold">{selectedFoods.join(" • ")}</p>
+                  </div>
+                )}
+
+                {selectedMovies.length > 0 && (
+                  <div className="flex flex-col gap-1 border-b-2 border-dashed border-gray-100 pb-2">
+                    <p className="text-gray-400 text-sm uppercase font-bold">🍿 Movies</p>
+                    <p className="text-[#ff4d88] text-xl font-bold">{selectedMovies.join(" • ")}</p>
+                  </div>
+                )}
+
+                {selectedWorkshops.length > 0 && (
+                  <div className="flex flex-col gap-1 border-b-2 border-dashed border-gray-100 pb-2">
+                    <p className="text-gray-400 text-sm uppercase font-bold">🎨 Workshop</p>
+                    <p className="text-[#ff4d88] text-xl font-bold">{selectedWorkshops.join(" • ")}</p>
+                  </div>
+                )}
+
+                {dateData.activity === 'Board Game' && (
+                  <div className="flex flex-col gap-1 border-b-2 border-dashed border-gray-100 pb-2">
+                    <p className="text-gray-400 text-sm uppercase font-bold">🎲 Other Activity</p>
+                    <p className="text-[#ff4d88] text-xl font-bold uppercase">{dateData.activity}</p>
+                  </div>
+                )}
+
+                {customRequest && (
+                  <div className="flex flex-col gap-1">
+                    <p className="text-gray-400 text-sm uppercase font-bold">✍️ Your Rules</p>
+                    <p className="text-[#ff4d88] text-xl font-bold break-words">{customRequest}</p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+              <p className="text-white text-2xl tracking-wide drop-shadow-[1px_1px_0_#ff4d88] text-center mt-4 z-20">
+                Everything looks perfect! Ready to send?
+              </p>
+            </>
+          )}
 
-          <p className="text-white text-2xl tracking-wide drop-shadow-[1px_1px_0_#ff4d88] text-center mt-4">
-            Everything looks perfect! Ready to send?
-          </p>
-
-          {/* Nút gửi lời mời cuối cùng - ĐÃ GẮN HÀM handleFinalSend */}
+          {/* Nút gửi lời mời cuối cùng dùng chung cho cả 2 trường hợp */}
           <button 
             onClick={handleFinalSend}
-            className="w-[90%] md:w-3/4 h-16 bg-[#22c55e] text-white text-3xl font-bold border-4 border-[#166534] rounded shadow-[4px_4px_0_0_#166534] transition-transform duration-200 hover:scale-105 active:scale-95 cursor-pointer uppercase flex justify-center items-center gap-3 mt-4"
+            className="w-[90%] md:w-3/4 h-16 bg-[#22c55e] text-white text-3xl font-bold border-4 border-[#166534] rounded shadow-[4px_4px_0_0_#166534] transition-transform duration-200 hover:scale-105 active:scale-95 cursor-pointer uppercase flex justify-center items-center gap-3 mt-4 z-20 relative"
           >
             Send Invitation <span>💌</span>
           </button>
