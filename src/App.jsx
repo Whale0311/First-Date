@@ -111,20 +111,18 @@ function App() {
     else if (act === 'Movie Night') setStep(8);
     else if (act === 'Custom Request') setStep(9);
     else if (act === 'Board Game') {
-      // Bật/tắt trạng thái chọn Board Game
       setDateData(prev => ({
         ...prev,
         activity: prev.activity === 'Board Game' ? '' : 'Board Game'
       }));
     }
     else if (act === 'Surprise Me') {
-      // Đặt activity thành Surprise Me và xóa sạch các lựa chọn khác
       setDateData(prev => ({ ...prev, activity: 'Surprise Me' }));
       setSelectedFoods([]);
       setSelectedMovies([]);
       setSelectedWorkshops([]);
-      setCustomRequest('');
-      setStep(7); // Nhảy thẳng ra trang cuối
+      // ĐÃ XÓA DÒNG setCustomRequest(''); ĐỂ GIỮ LẠI LỜI NHẮN CỦA BẠN ẤY
+      setStep(7); 
     }
   };
 
@@ -629,6 +627,14 @@ function App() {
                 <p className="text-gray-500 text-xl font-bold mt-2">
                   (Mọi lịch trình cứ để tớ lo nhé!)
                 </p>
+                
+                {/* HIỆN YÊU CẦU RIÊNG NẾU CÓ */}
+                {customRequest && (
+                  <div className="mt-6 p-4 bg-pink-50 border-2 border-dashed border-[#ff4d88] rounded-lg">
+                    <p className="text-gray-500 text-sm font-bold uppercase mb-1">✍️ Nhưng tớ đã note lại lưu ý của cậu:</p>
+                    <p className="text-[#ff4d88] text-xl font-bold italic">"{customRequest}"</p>
+                  </div>
+                )}
               </div>
             </>
           ) : (
