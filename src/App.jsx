@@ -631,7 +631,7 @@ function App() {
                 {/* HIỆN YÊU CẦU RIÊNG NẾU CÓ */}
                 {customRequest && (
                   <div className="mt-6 p-4 bg-pink-50 border-2 border-dashed border-[#ff4d88] rounded-lg">
-                    <p className="text-gray-500 text-sm font-bold uppercase mb-1">✍️ Nhưng tớ đã note lại lưu ý của cậu:</p>
+                    <p className="text-gray-500 text-sm font-bold uppercase mb-1">Note:</p>
                     <p className="text-[#ff4d88] text-xl font-bold italic">"{customRequest}"</p>
                   </div>
                 )}
